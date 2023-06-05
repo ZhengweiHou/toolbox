@@ -4,16 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/viant/toolbox"
 	"reflect"
 	"sync"
 	"sync/atomic"
+
+	"github.com/viant/toolbox"
 )
 
 type Field struct {
 	Name  string
 	Type  reflect.Type
-	index int
+	Index int
 }
 
 type nilGroup int
@@ -27,9 +28,8 @@ type CompactedSlice struct {
 	fields       []*Field
 	data         [][]interface{}
 	size         int64
-	RawEncoding bool
+	RawEncoding  bool
 }
-
 
 func (d CompactedSlice) MarshalJSON() ([]byte, error) {
 	buf := new(bytes.Buffer)
@@ -46,13 +46,13 @@ func (d CompactedSlice) MarshalJSON() ([]byte, error) {
 			}
 		}
 		i++
-		data, err :=json.Marshal(item)
+		data, err := json.Marshal(item)
 		if err != nil {
 			return false, err
 		}
 		_, err = buf.Write(data)
 		return err == nil, err
-	});err != nil {
+	}); err != nil {
 		return nil, err
 	}
 	if _, err := buf.Write([]byte("]")); err != nil {
@@ -61,10 +61,12 @@ func (d CompactedSlice) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-
-
 func (s *CompactedSlice) Fields() []*Field {
 	return s.fields
+}
+
+func (s *CompactedSlice) Datas() [][]interface{} {
+	return s.data
 }
 
 //Size returns size of collection
@@ -77,14 +79,14 @@ func (s *CompactedSlice) index(fieldName string, value interface{}) int {
 	f, ok := s.fieldNames[fieldName]
 	s.lock.RUnlock()
 	if ok {
-		return f.index
+		return f.Index
 	}
-	f = &Field{Name: fieldName, index: len(s.fieldNames), Type: reflect.TypeOf(value)}
+	f = &Field{Name: fieldName, Index: len(s.fieldNames), Type: reflect.TypeOf(value)}
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	s.fieldNames[fieldName] = f
 	s.fields = append(s.fields, f)
-	return f.index
+	return f.Index
 }
 
 func expandIfNeeded(size int, data []interface{}) []interface{} {
@@ -180,7 +182,7 @@ func (s *CompactedSlice) mapNamesToFieldPositions(names []string) ([]int, error)
 		if !ok {
 			return nil, fmt.Errorf("failed to lookup Field: %v", name)
 		}
-		result = append(result, field.index)
+		result = append(result, field.Index)
 	}
 	return result, nil
 }

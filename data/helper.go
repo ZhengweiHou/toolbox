@@ -2,11 +2,12 @@ package data
 
 import (
 	"fmt"
-	"github.com/viant/toolbox"
 	"reflect"
 	"sort"
 	"strings"
 	"unicode"
+
+	"github.com/viant/toolbox"
 )
 
 func ExtractPath(expression string) string {
@@ -22,7 +23,7 @@ func ExtractPath(expression string) string {
 
 func recordToMap(fields []*Field, record []interface{}, aMap map[string]interface{}) {
 	for _, field := range fields {
-		index := field.index
+		index := field.Index
 		var value = record[index]
 		if value == nil {
 			continue
